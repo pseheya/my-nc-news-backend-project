@@ -1,6 +1,10 @@
 const endpointsJson = require("../endpoints.json");
 const updateEndpoits = require("../update_json.util");
-const { readAllTopics, readArticleByID } = require("../models/app.model");
+const {
+  readAllTopics,
+  readArticleByID,
+  readArticles,
+} = require("../models/app.model");
 
 exports.getApiDocumentation = (req, res, next) => {
   res.status(200).send({ endpoints: endpointsJson });
@@ -24,6 +28,16 @@ exports.getArticleById = (req, res, next) => {
   readArticleByID(article_id)
     .then((article) => {
       res.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getArticles = (req, res, next) => {
+  readArticles()
+    .then((articles) => {
+      res.status(200).send({ articles });
     })
     .catch((err) => {
       next(err);
