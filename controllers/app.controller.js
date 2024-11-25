@@ -4,6 +4,7 @@ const {
   readAllTopics,
   readArticleByID,
   readArticles,
+  readCommentsByArticleId,
 } = require("../models/app.model");
 
 exports.getApiDocumentation = (req, res, next) => {
@@ -38,6 +39,18 @@ exports.getArticles = (req, res, next) => {
   readArticles()
     .then((articles) => {
       res.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getCommentsByArticleId = (req, res, next) => {
+  const { article_id } = req.params;
+
+  readCommentsByArticleId(article_id)
+    .then((comment) => {
+      res.status(200).send({ comment });
     })
     .catch((err) => {
       next(err);

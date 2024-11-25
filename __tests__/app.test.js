@@ -98,7 +98,7 @@ describe("GET /api/articles/:article_id", () => {
   });
 });
 
-describe.only("GET /api/articles", () => {
+describe("GET /api/articles", () => {
   test("200: Respond with objects that count commends for every article, and sorted it in descending order by default", () => {
     return request(app)
       .get("/api/articles")
@@ -120,6 +120,43 @@ describe.only("GET /api/articles", () => {
             descending: true,
           });
         });
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  test("200: Respond with all commebts for ab article we passing in", () => {
+    return request(app)
+      .get("/api/articles/3/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toHaveLength(2);
+        body.comment.forEach((comments) => {
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(Number),
+            author: expect.any(String),
+            body: expect.any(String),
+            article_id: 3,
+          });
+        });
+      });
+  });
+  test("404: Respond with message 'Not found' if id is valid but not exist in database", () => {
+    return request(app)
+      .get("/api/articles/999/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("400: Respond with message 'Bad request' if id in URL is not valid", () => {
+    return request(app)
+      .get("/api/articles/notAValidId/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });

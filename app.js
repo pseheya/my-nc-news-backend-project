@@ -5,6 +5,7 @@ const {
   getAllTopics,
   getArticleById,
   getArticles,
+  getCommentsByArticleId,
 } = require("./controllers/app.controller");
 const {
   sqlErrors,
@@ -24,6 +25,8 @@ app.get("/api/topics", getAllTopics);
 app.get("/api/articles/:article_id", getArticleById);
 
 app.get("/api/articles", getArticles);
+
+app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.use((req, res, next) => {
   if (res.headersSent && req.originalUrl.startsWith("/api")) {
