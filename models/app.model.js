@@ -19,3 +19,18 @@ exports.readArticleByID = (id) => {
       return rows[0];
     });
 };
+
+exports.readArticles = () => {
+  let text = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
+    FROM articles
+    JOIN comments ON articles.article_id = comments.article_id
+    GROUP BY articles.article_id
+    ORDER BY articles.created_at DESC`;
+
+  return db.query(text).then(({ rows }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" });
+    }
+    return rows;
+  });
+};

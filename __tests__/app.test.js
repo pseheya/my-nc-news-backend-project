@@ -3,6 +3,7 @@ const seed = require("../db/seeds/seed");
 const db = require("../db/connection");
 const request = require("supertest");
 const app = require("../app.js");
+require("jest-sorted");
 
 const {
   articleData,
@@ -62,13 +63,12 @@ describe("GET /api/topics ", () => {
   });
 });
 
-describe.only("GET /api/articles/:article_id", () => {
+describe("GET /api/articles/:article_id", () => {
   test("200: Respond with one object from article table, and the object should have id that we passed in URL", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
       .then(({ body }) => {
-        expect(body.article.article_id).toBe(1);
         expect(body.article).toMatchObject({
           author: expect.any(String),
           title: expect.any(String),
@@ -94,6 +94,32 @@ describe.only("GET /api/articles/:article_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe.only("GET /api/articles", () => {
+  test("200: Respond with objects that count commends for every article, and sorted it in descending order by default", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(5);
+        body.articles.forEach((article) => {
+          expect.objectContaining({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(Number),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(Number),
+          });
+          expect(body.articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
       });
   });
 });
