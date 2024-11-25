@@ -28,13 +28,44 @@ describe("GET /api", () => {
         expect(endpoints).toEqual(endpointsJson);
       });
   });
-  // test("404: Responds with message that URL is not found", () => {
-  //   return request(app)
-  //     .get("/app")
-  //     .expect(404)
-  //     .then((res) => {
-  //       console.log(res.body);
-  //       // expect(msg).toBe("Not found");
-  //     });
-  // });
+});
+
+describe("Wrong URL path", () => {
+  test("404: respond with message 'Not found', if the URL path is not valisd", () => {
+    return request(app)
+      .get("/notavalidurl")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+});
+
+describe("GET /api/topics ", () => {
+  test("200: Responds with an object with all topics and the object should have properties: slug and description", () => {
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.topics).toHaveLength(3);
+        body.topics.forEach((topic) => {
+          expect(typeof topic.slug).toBe("string");
+          expect(typeof topic.description).toBe("string");
+          expect(body.topics[0]).toEqual(
+            expect.objectContaining({
+              slug: expect.any(String),
+              description: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("400: Respond with msg that topisc not found if we requesting a invalid route", () => {
+    return request(app)
+      .get("/api/nonatopicroute")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
 });
