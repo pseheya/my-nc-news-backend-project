@@ -60,12 +60,40 @@ describe("GET /api/topics ", () => {
         });
       });
   });
-  test("400: Respond with msg that topisc not found if we requesting a invalid route", () => {
+});
+
+describe.only("GET /api/articles/:article_id", () => {
+  test("200: Respond with one object from article table, and the object should have id that we passed in URL", () => {
     return request(app)
-      .get("/api/nonatopicroute")
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.article_id).toBe(1);
+        expect(body.article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: 1,
+          body: expect.any(String),
+          topic: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+        });
+      });
+  });
+  test("404: Respond with message 'Not found' if id is valid but not exist in database", () => {
+    return request(app)
+      .get("/api/articles/999")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Not found");
+      });
+  });
+  test("400: Respond with message 'Bad request' if id in URL is not valid", () => {
+    return request(app)
+      .get("/api/articles/notAValidId")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });

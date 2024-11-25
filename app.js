@@ -3,6 +3,7 @@ const app = express();
 const {
   getApiDocumentation,
   getAllTopics,
+  getArticleById,
 } = require("./controllers/app.controller");
 const {
   sqlErrors,
@@ -18,6 +19,8 @@ app.use(express.json());
 app.get("/api", getApiDocumentation);
 
 app.get("/api/topics", getAllTopics);
+
+app.get("/api/articles/:article_id", getArticleById);
 
 app.use((req, res, next) => {
   if (res.headersSent && req.originalUrl.startsWith("/api")) {
