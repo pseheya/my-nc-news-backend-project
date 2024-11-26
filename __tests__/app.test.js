@@ -285,4 +285,34 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
-// describe("DELETE /api/comments/:comment_id");
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: Respond with No content, body should be an empty object", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+  test("204, 404: Respond with status 204, and 404,  return a message that comment is not found", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+
+        return request(app).get("/api/comments/1").expect(404);
+      })
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("404: Respond with message that id is not found", () => {
+    return request(app)
+      .delete("/api/comments/9588475")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Comment not found");
+      });
+  });
+});

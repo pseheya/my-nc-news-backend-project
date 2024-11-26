@@ -8,6 +8,7 @@ const {
   createCommentById,
   updateVotesByArticleId,
   findCommentByCommentId,
+  readCommentsByCommentId,
 } = require("../models/app.model");
 const { usersData, articleData } = require("../models/data.models");
 const { user } = require("pg/lib/defaults");
@@ -65,6 +66,18 @@ exports.getCommentsByArticleId = (req, res, next) => {
     });
 };
 
+exports.getCommentsById = (req, res, next) => {
+  const { comment_id } = req.params;
+
+  readCommentsByCommentId(comment_id)
+    .then((comment) => {
+      res.status(200).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 exports.postCommentByArticleId = (req, res, next) => {
   const { username, body } = req.body;
   const { article_id } = req.params;
@@ -107,10 +120,9 @@ exports.patchVotesByArticleId = (req, res, next) => {
 
 exports.deleteCommentByCommentID = (req, res, next) => {
   const { comment_id } = req.params;
-
   findCommentByCommentId(comment_id)
-    .then((comment) => {
-      res.status(201).send({ msg: comment });
+    .then(() => {
+      res.status(204).send();
     })
     .catch((err) => {
       next(err);
