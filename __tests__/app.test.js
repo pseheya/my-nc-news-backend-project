@@ -403,3 +403,27 @@ describe("GET /api/articles (sorting queries)", () => {
       });
   });
 });
+
+describe("GET /api/articles (topic query)", () => {
+  test.only("200: Respond with object that sorted_by created_at by default in desc order,and topic =cat", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(1);
+        expect(body.articles).toBeSortedBy("created_at", { descending: true });
+        body.articles.forEach((article) => {
+          expect.objectContaining({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: "cats",
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            comment_count: expect.any(String),
+          });
+        });
+      });
+  });
+});
