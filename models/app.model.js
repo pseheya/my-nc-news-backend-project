@@ -73,3 +73,18 @@ exports.createCommentById = (article_id, username, body) => {
     return rows;
   });
 };
+
+exports.updateVotesByArticleId = (id, inc_votes) => {
+  const values = [Math.abs(inc_votes), id];
+  let operator = inc_votes > 0 ? "+" : "-";
+
+  let sqlQuery = `UPDATE articles SET votes = votes ${operator} $1 WHERE article_id = $2 RETURNING *`;
+
+  console.log(sqlQuery);
+  return db.query(sqlQuery, values).then(({ rows }) => {
+    if (!rows.length) {
+      return Promise.reject({ status: 404, msg: "Not found" });
+    }
+    return rows[0];
+  });
+};

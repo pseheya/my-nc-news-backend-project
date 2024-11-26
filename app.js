@@ -7,6 +7,7 @@ const {
   getArticles,
   getCommentsByArticleId,
   postCommentByArticleId,
+  patchVotesByArticleId,
 } = require("./controllers/app.controller");
 const {
   sqlErrors,
@@ -14,6 +15,7 @@ const {
   serverError,
   unmatchRouts,
 } = require("./error.handling");
+const { updateVotesByArticleId } = require("./models/app.model");
 
 app.use(express.json());
 
@@ -28,6 +30,8 @@ app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
+
+app.patch("/api/articles/:article_id", patchVotesByArticleId);
 
 app.use(sqlErrors);
 app.use(custumError);
