@@ -64,6 +64,16 @@ exports.readCommentsByArticleId = (id) => {
     });
 };
 
+exports.readCommentsByCommentId = (id) => {
+  return db
+    .query("SELECT * FROM comments WHERE comment_id = $1", [id])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({ status: 404, msg: "Not found" });
+      }
+    });
+};
+
 exports.createCommentById = (article_id, username, body) => {
   const values = [body, article_id, username];
   const sqlQuery =
@@ -80,7 +90,6 @@ exports.updateVotesByArticleId = (id, inc_votes) => {
 
   let sqlQuery = `UPDATE articles SET votes = votes ${operator} $1 WHERE article_id = $2 RETURNING *`;
 
-  console.log(sqlQuery);
   return db.query(sqlQuery, values).then(({ rows }) => {
     if (!rows.length) {
       return Promise.reject({ status: 404, msg: "Not found" });
@@ -91,8 +100,10 @@ exports.updateVotesByArticleId = (id, inc_votes) => {
 
 exports.findCommentByCommentId = (id) => {
   return db
-    .query(`DELETE * FROM comments WHERE comment_id = $1`, id)
-    .then(() => {
-      return `Comment on comment_id ${id} successfully deleted `;
+    .query(`DELETE FROM comments WHERE comment_id = $1`, [id])
+    .then(({ rowCount }) => {
+      if (rowCount === 0) {
+        return Promise.reject({ status: 404, msg: "Comment not found" });
+      }
     });
 };
