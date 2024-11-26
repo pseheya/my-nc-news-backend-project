@@ -44,7 +44,8 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  readArticles()
+  const { sort_by, order } = req.query;
+  readArticles(sort_by, order)
     .then((articles) => {
       updateEndpoits(req, articles);
       res.status(200).send({ articles });
