@@ -316,3 +316,44 @@ describe("DELETE /api/comments/:comment_id", () => {
       });
   });
 });
+
+describe("GET /api/users", () => {
+  test("200: Respond with object from users table. All objects should include properies: username, name, avatar_url", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.users).toHaveLength(4);
+        body.users.forEach((user) => {
+          expect.objectContaining({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String),
+          });
+        });
+      });
+  });
+  test("404: Respond with message not found if it is wrong URL", () => {
+    return request(app)
+      .get("/api/wrongUrlForUser")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("500: Respond with server error when it is something wrong with databse", () => {
+    const spy = jest
+      .spyOn(db, "query")
+      .mockRejectedValueOnce(new Error("Failed to connecting to database"));
+
+    return request(app)
+      .get("/api/users")
+      .expect(500)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Server Error");
+      })
+      .then(() => {
+        spy.mockRestore();
+      });
+  });
+});

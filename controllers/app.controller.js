@@ -9,6 +9,7 @@ const {
   updateVotesByArticleId,
   findCommentByCommentId,
   readCommentsByCommentId,
+  readAllUsers,
 } = require("../models/app.model");
 const { usersData, articleData } = require("../models/data.models");
 const { user } = require("pg/lib/defaults");
@@ -72,6 +73,16 @@ exports.getCommentsById = (req, res, next) => {
   readCommentsByCommentId(comment_id)
     .then((comment) => {
       res.status(200).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getAllUsers = (req, res, next) => {
+  readAllUsers()
+    .then((users) => {
+      res.status(200).send({ users });
     })
     .catch((err) => {
       next(err);
