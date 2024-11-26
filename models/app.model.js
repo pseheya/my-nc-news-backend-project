@@ -35,10 +35,11 @@ exports.readArticleByID = (id) => {
 //   return articles.rows[0];
 // };
 
-exports.readArticles = (sort_by = "created_at", order = "DESC") => {
+exports.readArticles = (sort_by = "created_at", order = "DESC", topic) => {
   const validSortBy = ["created_at", "title", "topic", "author", "votes"];
   const validOrder = ["ASC", "DESC"];
-
+  const dangerousKeywords =
+    /(\bDROP\b|\bDELETE\b|\bINSERT\b|\bUPDATE\b|\bSELECT\b|\bALTER\b|\bTRUNCATE\b|\bEXEC\b|\b--|;|\/\*)/i;
   if (!validSortBy.includes(sort_by)) {
     return Promise.reject({ status: 400, msg: "Sort_by is not valid" });
   }
@@ -47,13 +48,24 @@ exports.readArticles = (sort_by = "created_at", order = "DESC") => {
     return Promise.reject({ status: 400, msg: "Order is not valid" });
   }
 
+  if (dangerousKeywords.test(topic)) {
+    return Promise.reject({ status: 400, msg: "Bed request" });
+  }
+
+  const queryValues = [];
+
   let sqlQuery = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
     FROM articles
-     JOIN comments ON articles.article_id = comments.article_id
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order}`;
+     JOIN comments ON articles.article_id = comments.article_id `;
 
-  return db.query(sqlQuery).then(({ rows }) => {
+  if (topic !== undefined) {
+    sqlQuery += `WHERE articles.topic = $1 `;
+    queryValues.push(topic);
+  }
+
+  sqlQuery += `GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order}`;
+  return db.query(sqlQuery, queryValues).then(({ rows }) => {
     if (rows.length === 0) {
       return Promise.reject({ status: 404, msg: "Not found" });
     }
