@@ -107,3 +107,17 @@ exports.findCommentByCommentId = (id) => {
       }
     });
 };
+
+exports.readAllUsers = () => {
+  return db
+    .query("SELECT * FROM users")
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({ status: 404, msg: "Users are not found" });
+      }
+      return rows;
+    })
+    .catch((err) => {
+      return Promise.reject(new Error("Server Error"));
+    });
+};
