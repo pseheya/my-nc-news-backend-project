@@ -34,7 +34,7 @@ describe("GET /api", () => {
 describe("Wrong URL path", () => {
   test("404: respond with message 'Not found', if the URL path is not valisd", () => {
     return request(app)
-      .get("/notavalidurl")
+      .get("/notAValidUrl")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Not found");
@@ -162,25 +162,68 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
 });
 
-// describe("POST /api/articles/:article_id/comments", () => {
-//   test("201: Respond with new object that contains article_id, username, body, comment", () => {
-//     const newComment = {
-//       username: "Marria",
-//       body: "They can do it better, but it is what it is",
-//     };
-//     return request(app)
-//       .get("/api/articles/2/comments")
-//       .send(newComment)
-//       .expect(201)
-//       .then(({ body }) => {
-//         expect(body.comment).toEqual({
-//           comment_id: expect.any(Number),
-//           votes: expect.any(Number),
-//           created_at: expect.any(Number),
-//           article_id: 2,
-//           authot: "Marria",
-//           body: "They can do it better, but it is what it is",
-//         });
-//       });
-//   });
-// });
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Respond with new object that contains article_id, username, body, comment, when user is exist in users table", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "They can do it better, but it is what it is",
+    };
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toEqual({
+          comment_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          article_id: 2,
+          author: "icellusedkars",
+          body: "They can do it better, but it is what it is",
+        });
+      });
+  });
+  test("404: Respond with msg 'Bad request', if article_id is valid but not exist", () => {
+    const newComment = {
+      username: "icellusedkars",
+      body: "They can do it better, but it is what it is",
+    };
+
+    return request(app)
+      .post("/api/articles/999/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+
+  test("404: Respond with msg 'Not found', if URL path is not valid", () => {
+    const newComment = {
+      username: "Marria",
+      body: "They can do it better, but it is what it is",
+    };
+
+    return request(app)
+      .post("/api/articles/999/notAValidURl")
+      .send(newComment)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("404: Respond with msg 'Bad request', when user name is not exist in database", () => {
+    const newComment = {
+      username: "Marria",
+      body: "They can do it better, but it is what it is",
+    };
+
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});

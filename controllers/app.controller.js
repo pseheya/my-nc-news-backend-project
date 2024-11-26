@@ -5,7 +5,10 @@ const {
   readArticleByID,
   readArticles,
   readCommentsByArticleId,
+  createCommentById,
 } = require("../models/app.model");
+const { usersData, articleData } = require("../models/data.models");
+const { user } = require("pg/lib/defaults");
 
 exports.getApiDocumentation = (req, res, next) => {
   res.status(200).send({ endpoints: endpointsJson });
@@ -54,6 +57,27 @@ exports.getCommentsByArticleId = (req, res, next) => {
     .then((comment) => {
       updateEndpoits(req, comment);
       res.status(200).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.postCommentByArticleId = (req, res, next) => {
+  const { username, body } = req.body;
+  const { article_id } = req.params;
+  const promises = [createCommentById(article_id, username, body)];
+  if (username) {
+    promises.push(usersData(username));
+  }
+  if (article_id) {
+    promises.push(articleData(article_id));
+  }
+
+  Promise.all(promises)
+    .then(([[comment]]) => {
+      updateEndpoits(req, comment);
+      res.status(201).send({ comment });
     })
     .catch((err) => {
       next(err);
