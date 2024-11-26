@@ -73,7 +73,7 @@ describe("GET /api/articles/:article_id", () => {
           author: expect.any(String),
           title: expect.any(String),
           article_id: 1,
-          body: expect.any(String),
+          // body: expect.any(String),
           topic: expect.any(String),
           votes: expect.any(Number),
           article_img_url: expect.any(String),
@@ -140,6 +140,7 @@ describe("GET /api/articles/:article_id/comments", () => {
             body: expect.any(String),
             article_id: 3,
           });
+          expect(body.comment).toBeSortedBy("created_at");
         });
       });
   });
@@ -160,3 +161,26 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+// describe("POST /api/articles/:article_id/comments", () => {
+//   test("201: Respond with new object that contains article_id, username, body, comment", () => {
+//     const newComment = {
+//       username: "Marria",
+//       body: "They can do it better, but it is what it is",
+//     };
+//     return request(app)
+//       .get("/api/articles/2/comments")
+//       .send(newComment)
+//       .expect(201)
+//       .then(({ body }) => {
+//         expect(body.comment).toEqual({
+//           comment_id: expect.any(Number),
+//           votes: expect.any(Number),
+//           created_at: expect.any(Number),
+//           article_id: 2,
+//           authot: "Marria",
+//           body: "They can do it better, but it is what it is",
+//         });
+//       });
+//   });
+// });

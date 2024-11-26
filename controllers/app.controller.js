@@ -28,6 +28,7 @@ exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   readArticleByID(article_id)
     .then((article) => {
+      updateEndpoits(req, article);
       res.status(200).send({ article });
     })
     .catch((err) => {
