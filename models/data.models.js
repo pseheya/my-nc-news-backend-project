@@ -22,3 +22,16 @@ exports.articleData = (article_id) => {
       }
     });
 };
+
+exports.commentId = (comment_id) => {
+  return db
+    .query("SELECT * FROM comments WHERE commnet_id = $1", [comment_id])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "This comment id is not exist",
+        });
+      }
+    });
+};
