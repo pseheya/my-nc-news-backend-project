@@ -14,8 +14,6 @@ const {
   unmatchRouts,
 } = require("./error.handling");
 
-const updateEndpoits = require("./update_json.util");
-
 app.use(express.json());
 
 app.get("/api", getApiDocumentation);
@@ -28,12 +26,6 @@ app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
-app.use((req, res, next) => {
-  if (res.headersSent && req.originalUrl.startsWith("/api")) {
-    updateEndpoits(req, res, next);
-  }
-  next();
-});
 app.use(sqlErrors);
 app.use(custumError);
 app.use(unmatchRouts);

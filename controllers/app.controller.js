@@ -28,6 +28,7 @@ exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
   readArticleByID(article_id)
     .then((article) => {
+      updateEndpoits(req, article);
       res.status(200).send({ article });
     })
     .catch((err) => {
@@ -38,6 +39,7 @@ exports.getArticleById = (req, res, next) => {
 exports.getArticles = (req, res, next) => {
   readArticles()
     .then((articles) => {
+      updateEndpoits(req, articles);
       res.status(200).send({ articles });
     })
     .catch((err) => {
@@ -50,6 +52,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
 
   readCommentsByArticleId(article_id)
     .then((comment) => {
+      updateEndpoits(req, comment);
       res.status(200).send({ comment });
     })
     .catch((err) => {
