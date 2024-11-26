@@ -1,3 +1,4 @@
+const { rows, user } = require("pg/lib/defaults");
 const db = require("../db/connection");
 const format = require("pg-format");
 
@@ -61,4 +62,14 @@ exports.readCommentsByArticleId = (id) => {
       }
       return rows;
     });
+};
+
+exports.createCommentById = (article_id, username, body) => {
+  const values = [body, article_id, username];
+  const sqlQuery =
+    "INSERT INTO comments (body, article_id, author) VALUES($1, $2, $3) RETURNING comment_id, article_id, author, body, votes, created_at;";
+
+  return db.query(sqlQuery, values).then(({ rows }) => {
+    return rows;
+  });
 };
