@@ -76,6 +76,7 @@ exports.postCommentByArticleId = (req, res, next) => {
 
   Promise.all(promises)
     .then(([[comment]]) => {
+      updateEndpoits(req, comment);
       res.status(201).send({ comment });
     })
     .catch((err) => {
