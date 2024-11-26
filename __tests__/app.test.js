@@ -357,3 +357,49 @@ describe("GET /api/users", () => {
       });
   });
 });
+
+describe("GET /api/articles (sorting queries)", () => {
+  test("200: Respond with object that sorted_by created_at by default in desc order", () => {
+    return request(app)
+      .get("/api/articles?sorted_by")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+  test("200: Respond with object that sorted_by topic, in asc order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=topic&order=ASC")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toBeSortedBy("topic");
+      });
+  });
+  test("200: Responds with objects that sorted_by title in desc order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=topic&order=DESC")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toBeSortedBy("topic", { descending: true });
+      });
+  });
+  test("400: Respond with message that sorted_by is not valid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=banana&order=DESC")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Sort_by is not valid");
+      });
+  });
+  test("400: Respond with message that order is not valid", () => {
+    return request(app)
+      .get("/api/articles?sort_by=topic&order=banana")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Order is not valid");
+      });
+  });
+});
