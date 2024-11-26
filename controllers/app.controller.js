@@ -33,6 +33,7 @@ exports.getAllTopics = (req, res, next) => {
 
 exports.getArticleById = (req, res, next) => {
   const { article_id } = req.params;
+  const { comment_count } = req.query;
   readArticleByID(article_id)
     .then((article) => {
       updateEndpoits(req, article);

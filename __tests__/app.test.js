@@ -405,7 +405,7 @@ describe("GET /api/articles (sorting queries)", () => {
 });
 
 describe("GET /api/articles (topic query)", () => {
-  test.only("200: Respond with object that sorted_by created_at by default in desc order,and topic =cat", () => {
+  test("200: Respond with object that sorted_by created_at by default in desc order,and topic =cat", () => {
     return request(app)
       .get("/api/articles?topic=cats")
       .expect(200)
@@ -424,6 +424,41 @@ describe("GET /api/articles (topic query)", () => {
             comment_count: expect.any(String),
           });
         });
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id", () => {
+  test("200: Respond with one object from article table, and the object should include now a comment_count", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          author: expect.any(String),
+          title: expect.any(String),
+          article_id: 1,
+          topic: expect.any(String),
+          votes: expect.any(Number),
+          article_img_url: expect.any(String),
+          comment_count: expect.any(String),
+        });
+      });
+  });
+  test("404: Respond with message 'Not found' if id is valid but not exist in database", () => {
+    return request(app)
+      .get("/api/articles/999")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("400: Respond with message 'Bad request' if id in URL is not valid", () => {
+    return request(app)
+      .get("/api/articles/notAValidId")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });
