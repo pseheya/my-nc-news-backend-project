@@ -88,3 +88,11 @@ exports.updateVotesByArticleId = (id, inc_votes) => {
     return rows[0];
   });
 };
+
+exports.findCommentByCommentId = (id) => {
+  return db
+    .query(`DELETE * FROM comments WHERE comment_id = $1`, id)
+    .then(() => {
+      return `Comment on comment_id ${id} successfully deleted `;
+    });
+};

@@ -251,7 +251,7 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 
-  test.only("200: Respond with update votes in article, when votes less than 0", () => {
+  test("200: Respond with update votes in article, when votes less than 0", () => {
     const newVote = { inc_votes: -100 };
 
     return request(app)
@@ -284,3 +284,5 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+// describe("DELETE /api/comments/:comment_id");
