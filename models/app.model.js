@@ -64,7 +64,7 @@ exports.readArticles = (sort_by = "created_at", order = "DESC", topic) => {
   }
 
   if (dangerousKeywords.test(topic)) {
-    return Promise.reject({ status: 400, msg: "Bed request" });
+    return Promise.reject({ status: 400, msg: "Topic is not valid" });
   }
 
   const queryValues = [];
@@ -127,7 +127,6 @@ exports.updateVotesByArticleId = (id, inc_votes) => {
   let operator = inc_votes > 0 ? "+" : "-";
 
   let sqlQuery = `UPDATE articles SET votes = votes ${operator} $1 WHERE article_id = $2 RETURNING *`;
-
   return db.query(sqlQuery, values).then(({ rows }) => {
     if (!rows.length) {
       return Promise.reject({ status: 404, msg: "Not found" });
@@ -147,15 +146,10 @@ exports.findCommentByCommentId = (id) => {
 };
 
 exports.readAllUsers = () => {
-  return db
-    .query("SELECT * FROM users")
-    .then(({ rows }) => {
-      if (!rows.length) {
-        return Promise.reject({ status: 404, msg: "Users are not found" });
-      }
-      return rows;
-    })
-    .catch((err) => {
-      return Promise.reject(new Error("Server Error"));
-    });
+  return db.query("SELECT * FROM users").then(({ rows }) => {
+    if (!rows.length) {
+      return Promise.reject({ status: 404, msg: "Users are not found" });
+    }
+    return rows;
+  });
 };
