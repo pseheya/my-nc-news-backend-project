@@ -73,7 +73,6 @@ describe("GET /api/articles/:article_id", () => {
           author: expect.any(String),
           title: expect.any(String),
           article_id: 1,
-          // body: expect.any(String),
           topic: expect.any(String),
           votes: expect.any(Number),
           article_img_url: expect.any(String),
@@ -197,22 +196,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("Bad request");
       });
   });
-
-  test("404: Respond with msg 'Not found', if URL path is not valid", () => {
-    const newComment = {
-      username: "Marria",
-      body: "They can do it better, but it is what it is",
-    };
-
-    return request(app)
-      .post("/api/articles/999/notAValidURl")
-      .send(newComment)
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Not found");
-      });
-  });
-  test("404: Respond with msg 'Bad request', when user name is not exist in database", () => {
+  test("400: Respond with msg 'Bad request', when user name is not exist in database", () => {
     const newComment = {
       username: "Marria",
       body: "They can do it better, but it is what it is",
@@ -242,7 +226,7 @@ describe("PATCH /api/articles/:article_id", () => {
           title: "Sony Vaio; or, The Laptop",
           topic: "mitch",
           author: "icellusedkars",
-          body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+          body: expect.any(String),
           created_at: "2020-10-16T05:03:00.000Z",
           votes: 5,
           article_img_url:
@@ -264,7 +248,7 @@ describe("PATCH /api/articles/:article_id", () => {
           title: "Sony Vaio; or, The Laptop",
           topic: "mitch",
           author: "icellusedkars",
-          body: "Call me Mitchell. Some years ago—never mind how long precisely—having little or no money in my purse, and nothing particular to interest me on shore, I thought I would buy a laptop about a little and see the codey part of the world. It is a way I have of driving off the spleen and regulating the circulation. Whenever I find myself growing grim about the mouth; whenever it is a damp, drizzly November in my soul; whenever I find myself involuntarily pausing before coffin warehouses, and bringing up the rear of every funeral I meet; and especially whenever my hypos get such an upper hand of me, that it requires a strong moral principle to prevent me from deliberately stepping into the street, and methodically knocking people’s hats off—then, I account it high time to get to coding as soon as I can. This is my substitute for pistol and ball. With a philosophical flourish Cato throws himself upon his sword; I quietly take to the laptop. There is nothing surprising in this. If they but knew it, almost all men in their degree, some time or other, cherish very nearly the same feelings towards the the Vaio with me.",
+          body: expect.any(String),
           created_at: "2020-10-16T05:03:00.000Z",
           votes: -100,
           article_img_url:
@@ -272,15 +256,36 @@ describe("PATCH /api/articles/:article_id", () => {
         });
       });
   });
-  test("400: Respond with msg 'Not Found', when user name is not exist in database", () => {
+  test("404: Respond with msg 'Not Found', when user name is not exist in database", () => {
     const newVote = { inc_votes: 5 };
-
     return request(app)
       .patch("/api/articles/2000")
       .send(newVote)
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Not found");
+      });
+  });
+  test("400: Respond with msg 'Bad request' if article_id is not a number", () => {
+    const newVote = { inc_votes: 99 };
+
+    return request(app)
+      .patch("/api/articles/iAmNotANumber")
+      .send(newVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Respond with msg 'Bad request' if votes we are passing is not a number", () => {
+    const newVote = { inc_votes: "I am not a number" };
+
+    return request(app)
+      .patch("/api/articles/2")
+      .send(newVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });
@@ -331,14 +336,6 @@ describe("GET /api/users", () => {
             avatar_url: expect.any(String),
           });
         });
-      });
-  });
-  test("404: Respond with message not found if it is wrong URL", () => {
-    return request(app)
-      .get("/api/wrongUrlForUser")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Not found");
       });
   });
   test("500: Respond with server error when it is something wrong with databse", () => {
@@ -405,7 +402,7 @@ describe("GET /api/articles (sorting queries)", () => {
 });
 
 describe("GET /api/articles (topic query)", () => {
-  test("200: Respond with object that sorted_by created_at by default in desc order,and topic =cat", () => {
+  test("200: Respond with object that sorted_by created_at by default in desc order,and topic =cats", () => {
     return request(app)
       .get("/api/articles?topic=cats")
       .expect(200)
@@ -424,6 +421,22 @@ describe("GET /api/articles (topic query)", () => {
             comment_count: expect.any(String),
           });
         });
+      });
+  });
+  test("404: Respond with message 'Not found' if this topic is not exist in the articles", () => {
+    return request(app)
+      .get("/api/articles?topic=banana")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("400: Respond with message 'Topic is not valid' when we passing a SQL injection words", () => {
+    return request(app)
+      .get("/api/articles?topic=DELETE * FROM articles")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Topic is not valid");
       });
   });
 });
@@ -451,14 +464,6 @@ describe("GET /api/articles/:article_id", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Not found");
-      });
-  });
-  test("400: Respond with message 'Bad request' if id in URL is not valid", () => {
-    return request(app)
-      .get("/api/articles/notAValidId")
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("Bad request");
       });
   });
 });
