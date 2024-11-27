@@ -135,6 +135,7 @@ exports.deleteCommentByCommentID = (req, res, next) => {
   const { comment_id } = req.params;
   findCommentByCommentId(comment_id)
     .then(() => {
+      updateEndpoits(req);
       res.status(204).send();
     })
     .catch((err) => {
@@ -147,6 +148,7 @@ exports.getUserByUserName = (req, res, next) => {
 
   readUserByUsername(username)
     .then((user) => {
+      updateEndpoits(req, user);
       res.status(200).send({ user });
     })
     .catch((err) => {
@@ -160,6 +162,7 @@ exports.patchCommentByCommentId = (req, res, next) => {
 
   readAndPatchCommentByCommentId(inc_votes, comment_id)
     .then((comment) => {
+      updateEndpoits(req, comment);
       res.status(201).send({ comment });
     })
     .catch((err) => {
@@ -172,6 +175,7 @@ exports.postNewArticle = (req, res, next) => {
 
   addNewArticle(title, topic, author, body)
     .then((article) => {
+      updateEndpoits(req, article);
       res.status(201).send({ article });
     })
     .catch((err) => {

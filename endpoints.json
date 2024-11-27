@@ -274,5 +274,45 @@
     "description": "serves an array of all /api/articles?topic=paper",
     "queries": [],
     "exampleResponse": []
+  },
+  "DELETE /api/comments/1": {
+    "description": "serves an array of all /api/comments/1",
+    "queries": []
+  },
+  "GET /api/users/lurker": {
+    "description": "serves an array of all /api/users/lurker",
+    "queries": [],
+    "exampleResponse": {
+      "username": "lurker",
+      "name": "do_nothing",
+      "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
+    }
+  },
+  "PATCH /api/comments/2": {
+    "description": "serves an array of all /api/comments/2",
+    "queries": [],
+    "exampleResponse": {
+      "comment_id": 2,
+      "body": "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky.",
+      "article_id": 1,
+      "author": "butter_bridge",
+      "votes": 114,
+      "created_at": "2020-10-31T03:03:00.000Z"
+    }
+  },
+  "POST /api/articles": {
+    "description": "serves an array of all /api/articles",
+    "queries": [],
+    "exampleResponse": {
+      "article_id": 14,
+      "title": "Hi! Its my first article",
+      "topic": "mitch",
+      "author": "butter_bridge",
+      "body": "Every day we are stronger and better",
+      "created_at": "2024-11-27T15:57:35.210Z",
+      "votes": 0,
+      "article_img_url": "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700",
+      "comment_count": 0
+    }
   }
 }
