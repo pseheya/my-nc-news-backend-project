@@ -374,7 +374,7 @@ describe("GET /api/articles (sorting queries)", () => {
         expect(body.articles).toBeSortedBy("topic");
       });
   });
-  test("200: Responds with objects that sorted_by title in desc order", () => {
+  test("200: Responds with objects that sorted_by topic in desc order", () => {
     return request(app)
       .get("/api/articles?sort_by=topic&order=DESC")
       .expect(200)
@@ -428,7 +428,7 @@ describe("GET /api/articles (topic query)", () => {
       .get("/api/articles?topic=banana")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Not found");
+        expect(body.msg).toBe("This topic is not exist");
       });
   });
   test("400: Respond with message 'Topic is not valid' when we passing a SQL injection words", () => {
@@ -437,6 +437,14 @@ describe("GET /api/articles (topic query)", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Topic is not valid");
+      });
+  });
+  test("200: Return an empty object when topic is exist but not attached to any articles", () => {
+    return request(app)
+      .get("/api/articles?topic=paper")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toEqual([]);
       });
   });
 });
@@ -464,6 +472,76 @@ describe("GET /api/articles/:article_id", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Not found");
+      });
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  test("200: Respond with object contain user that has this username", () => {
+    return request(app)
+      .get("/api/users/lurker")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.user).toEqual(
+          expect.objectContaining({
+            username: "lurker",
+            name: "do_nothing",
+            avatar_url:
+              "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          })
+        );
+      });
+  });
+  test("404: Respond with message 'This user does not exist in database' if user does not exist", () => {
+    return request(app)
+      .get("/api/users/margo")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("This user does not exist in database");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("201: Respond with updated votes in comment, by comment_id, when votes grater than 0", () => {
+    const newVote = { inc_votes: 100 };
+
+    return request(app)
+      .patch("/api/comments/2")
+      .send(newVote)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          body: expect.any(String),
+          votes: 114,
+          author: "butter_bridge",
+          article_id: 1,
+          created_at: expect.any(String),
+        });
+      });
+  });
+
+  test('404: Respond with "This comment does not exist" when id is valid but not exist in db', () => {
+    const newVote = { inc_votes: 100 };
+
+    return request(app)
+      .patch("/api/comments/999")
+      .send(newVote)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("This comment does not exist");
+      });
+  });
+
+  test("400: Respond with 'Bad request', when inc_votes' is not a number", () => {
+    const newVote = { inc_votes: "I am not a number" };
+
+    return request(app)
+      .patch("/api/comments/999")
+      .send(newVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
       });
   });
 });

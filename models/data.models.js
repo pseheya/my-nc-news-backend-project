@@ -35,3 +35,13 @@ exports.commentId = (comment_id) => {
       }
     });
 };
+
+exports.topicData = (topic) => {
+  return db
+    .query("SELECT * FROM topics WHERE topics.slug = $1", [topic])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({ status: 404, msg: "This topic is not exist" });
+      }
+    });
+};

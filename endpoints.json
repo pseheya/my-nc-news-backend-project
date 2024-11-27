@@ -269,5 +269,10 @@
         "comment_count": "2"
       }
     ]
+  },
+  "GET /api/articles?topic=paper": {
+    "description": "serves an array of all /api/articles?topic=paper",
+    "queries": [],
+    "exampleResponse": []
   }
 }

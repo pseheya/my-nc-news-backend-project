@@ -10,8 +10,10 @@ const {
   findCommentByCommentId,
   readCommentsByCommentId,
   readAllUsers,
+  readUserByUsername,
+  readAndPatchCommentByCommentId,
 } = require("../models/app.model");
-const { usersData, articleData } = require("../models/data.models");
+const { usersData, articleData, topicData } = require("../models/data.models");
 const { user } = require("pg/lib/defaults");
 
 exports.getApiDocumentation = (req, res, next) => {
@@ -46,8 +48,13 @@ exports.getArticleById = (req, res, next) => {
 
 exports.getArticles = (req, res, next) => {
   const { sort_by, order, topic } = req.query;
-  readArticles(sort_by, order, topic)
-    .then((articles) => {
+  const promises = [readArticles(sort_by, order, topic)];
+
+  if (topic) {
+    promises.push(topicData(topic));
+  }
+  Promise.all(promises)
+    .then(([articles]) => {
       updateEndpoits(req, articles);
       res.status(200).send({ articles });
     })
@@ -94,16 +101,8 @@ exports.getAllUsers = (req, res, next) => {
 exports.postCommentByArticleId = (req, res, next) => {
   const { username, body } = req.body;
   const { article_id } = req.params;
-  const promises = [createCommentById(article_id, username, body)];
-  if (username) {
-    promises.push(usersData(username));
-  }
-  if (article_id) {
-    promises.push(articleData(article_id));
-  }
-
-  Promise.all(promises)
-    .then(([[comment]]) => {
+  createCommentById(article_id, username, body)
+    .then(([comment]) => {
       updateEndpoits(req, comment);
       res.status(201).send({ comment });
     })
@@ -136,6 +135,31 @@ exports.deleteCommentByCommentID = (req, res, next) => {
   findCommentByCommentId(comment_id)
     .then(() => {
       res.status(204).send();
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.getUserByUserName = (req, res, next) => {
+  const { username } = req.params;
+
+  readUserByUsername(username)
+    .then((user) => {
+      res.status(200).send({ user });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.patchCommentByCommentId = (req, res, next) => {
+  const { inc_votes } = req.body;
+  const { comment_id } = req.params;
+
+  readAndPatchCommentByCommentId(inc_votes, comment_id)
+    .then((comment) => {
+      res.status(201).send({ comment });
     })
     .catch((err) => {
       next(err);

@@ -12,23 +12,12 @@ exports.readArticleByID = (id) => {
 
   return db
     .query(
-      `SELECT 
-  articles.author, 
-  articles.title, 
-  articles.article_id, 
-  articles.topic, 
-  articles.created_at, 
-  articles.votes, 
-  articles.article_img_url, 
+      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
   COUNT(comments.comment_id) AS comment_count
-FROM 
-  articles
-LEFT JOIN 
-  comments ON articles.article_id = comments.article_id
-WHERE 
-  articles.article_id = $1
-GROUP BY 
-  articles.article_id;`,
+FROM articles
+LEFT JOIN comments ON articles.article_id = comments.article_id
+WHERE articles.article_id = $1
+GROUP BY articles.article_id;`,
       value
     )
     .then(({ rows }) => {
@@ -81,9 +70,6 @@ exports.readArticles = (sort_by = "created_at", order = "DESC", topic) => {
   sqlQuery += `GROUP BY articles.article_id
     ORDER BY ${sort_by} ${order}`;
   return db.query(sqlQuery, queryValues).then(({ rows }) => {
-    if (rows.length === 0) {
-      return Promise.reject({ status: 404, msg: "Not found" });
-    }
     return rows;
   });
 };
@@ -152,4 +138,38 @@ exports.readAllUsers = () => {
     }
     return rows;
   });
+};
+
+exports.readUserByUsername = (username) => {
+  return db
+    .query("SELECT * FROM users WHERE username = $1", [username])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "This user does not exist in database",
+        });
+      }
+      return rows[0];
+    });
+};
+
+exports.readAndPatchCommentByCommentId = (inc_votes, id) => {
+  const values = [Math.abs(inc_votes), id];
+  let operator = inc_votes > 0 ? "+" : "-";
+
+  return db
+    .query(
+      `UPDATE comments SET votes = votes ${operator} $1 WHERE comment_id = $2 RETURNING *`,
+      values
+    )
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "This comment does not exist",
+        });
+      }
+      return rows[0];
+    });
 };
