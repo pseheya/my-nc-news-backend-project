@@ -18,7 +18,6 @@ const {
   serverError,
   unmatchRouts,
 } = require("./error.handling");
-const { updateVotesByArticleId } = require("./models/app.model");
 
 app.use(express.json());
 
