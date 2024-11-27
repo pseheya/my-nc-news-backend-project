@@ -173,3 +173,16 @@ exports.readAndPatchCommentByCommentId = (inc_votes, id) => {
       return rows[0];
     });
 };
+
+exports.addNewArticle = (title, topic, author, body) => {
+  const values = [title, topic, author, body];
+  return db
+    .query(
+      `INSERT INTO articles (title, topic, author, body) VALUES($1, $2, $3, $4)
+       RETURNING *`,
+      values
+    )
+    .then(({ rows }) => {
+      return { ...rows[0], comment_count: 0 };
+    });
+};

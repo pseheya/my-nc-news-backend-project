@@ -521,6 +521,24 @@ describe("PATCH /api/comments/:comment_id", () => {
       });
   });
 
+  test("201: Respond with updated votes in comment, by comment_id, when votes grater than 0", () => {
+    const newVote = { inc_votes: -100 };
+
+    return request(app)
+      .patch("/api/comments/2")
+      .send(newVote)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toMatchObject({
+          body: expect.any(String),
+          votes: -86,
+          author: "butter_bridge",
+          article_id: 1,
+          created_at: expect.any(String),
+        });
+      });
+  });
+
   test('404: Respond with "This comment does not exist" when id is valid but not exist in db', () => {
     const newVote = { inc_votes: 100 };
 
@@ -539,6 +557,79 @@ describe("PATCH /api/comments/:comment_id", () => {
     return request(app)
       .patch("/api/comments/999")
       .send(newVote)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe("POST /api/articles", () => {
+  test("201: Respond with new article object, including article_id, votes, created_at, comment_count, if topic and author is exist", () => {
+    const newArticle = {
+      title: "Hi! Its my first article",
+      topic: "mitch",
+      author: "butter_bridge",
+      body: "Every day we are stronger and better",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.article).toMatchObject({
+          title: "Hi! Its my first article",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "Every day we are stronger and better",
+          article_id: expect.any(Number),
+          votes: 0,
+          comment_count: expect.any(Number),
+          created_at: expect.any(String),
+        });
+      });
+  });
+  test("400: Respond with msg Bad request if user does not exist", () => {
+    const newArticle = {
+      title: "Hi! Its my first article",
+      topic: "cats",
+      author: "Katty",
+      body: "Every day we are stronger and better",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Respond with msg Bad request if topic does not exist", () => {
+    const newArticle = {
+      title: "Hi! Its my first article",
+      topic: "banana",
+      author: "butter_bridge",
+      body: "Every day we are stronger and better",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Respond with msg Bad request if properies from body missed", () => {
+    const newArticle = {
+      body: "Every day we are stronger and better",
+    };
+
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");

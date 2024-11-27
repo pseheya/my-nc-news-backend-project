@@ -12,6 +12,7 @@ const {
   readAllUsers,
   readUserByUsername,
   readAndPatchCommentByCommentId,
+  addNewArticle,
 } = require("../models/app.model");
 const { usersData, articleData, topicData } = require("../models/data.models");
 const { user } = require("pg/lib/defaults");
@@ -160,6 +161,18 @@ exports.patchCommentByCommentId = (req, res, next) => {
   readAndPatchCommentByCommentId(inc_votes, comment_id)
     .then((comment) => {
       res.status(201).send({ comment });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.postNewArticle = (req, res, next) => {
+  const { title, topic, author, body } = req.body;
+
+  addNewArticle(title, topic, author, body)
+    .then((article) => {
+      res.status(201).send({ article });
     })
     .catch((err) => {
       next(err);

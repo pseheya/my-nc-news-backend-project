@@ -5,7 +5,10 @@ exports.usersData = (username) => {
     .query("SELECT * FROM users WHERE username = $1", [username])
     .then(({ rows }) => {
       if (!rows.length) {
-        return Promise.reject({ status: 404, msg: "User does not exist" });
+        return Promise.reject({
+          status: 404,
+          msg: "User does not exist, you need create a new user or type correct username",
+        });
       }
     });
 };
