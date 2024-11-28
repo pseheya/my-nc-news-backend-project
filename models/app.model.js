@@ -39,7 +39,13 @@ GROUP BY articles.article_id;`,
 //   return articles.rows[0];
 // };
 
-exports.readArticles = (sort_by = "created_at", order = "DESC", topic) => {
+exports.readArticles = async (
+  sort_by = "created_at",
+  order = "DESC",
+  topic,
+  limit = "10",
+  p = "1"
+) => {
   const validSortBy = ["created_at", "title", "topic", "author", "votes"];
   const validOrder = ["ASC", "DESC"];
   const dangerousKeywords =
@@ -60,17 +66,36 @@ exports.readArticles = (sort_by = "created_at", order = "DESC", topic) => {
 
   let sqlQuery = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
     FROM articles
-     JOIN comments ON articles.article_id = comments.article_id `;
+    LEFT JOIN comments ON articles.article_id = comments.article_id `;
 
-  if (topic !== undefined) {
-    sqlQuery += `WHERE articles.topic = $1 `;
+  if (topic && topic !== undefined) {
+    sqlQuery += `WHERE articles.topic = $3 `;
+  }
+
+  sqlQuery += `GROUP BY articles.article_id 
+    ORDER BY ${sort_by} ${order}`;
+
+  let countQuery = `SELECT COUNT(DISTINCT articles.article_id) AS total_count
+FROM articles `;
+
+  let countQueryValues = [];
+  if (topic && topic !== undefined) {
+    countQuery += `WHERE articles.topic = $1 `;
+    countQueryValues.push(topic);
+  }
+
+  const totalCount = await db.query(countQuery, countQueryValues);
+  const totalCountOfArticle = totalCount.rows[0].total_count;
+
+  sqlQuery += ` LIMIT $1 OFFSET $2`;
+  queryValues.push(Number(limit), (Number(p) - 1) * Number(limit));
+
+  if (topic && topic !== undefined) {
     queryValues.push(topic);
   }
 
-  sqlQuery += `GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order}`;
   return db.query(sqlQuery, queryValues).then(({ rows }) => {
-    return rows;
+    return { articles: rows, total_count: totalCountOfArticle };
   });
 };
 
