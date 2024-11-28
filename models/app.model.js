@@ -94,9 +94,8 @@ FROM articles `;
     queryValues.push(topic);
   }
 
-  return db.query(sqlQuery, queryValues).then(({ rows }) => {
-    return { articles: rows, total_count: totalCountOfArticle };
-  });
+  const sqlRequest = await db.query(sqlQuery, queryValues);
+  return { articles: sqlRequest.rows, total_count: totalCountOfArticle };
 };
 
 exports.readCommentsByArticleId = (id, limit = 10, p = 1) => {
@@ -206,5 +205,20 @@ exports.addNewArticle = (title, topic, author, body) => {
     )
     .then(({ rows }) => {
       return { ...rows[0], comment_count: 0 };
+    });
+};
+
+exports.patchNewTopic = (slug, description) => {
+  if (!slug || !description) {
+    return Promise.reject({ status: 400, msg: "Bad request" });
+  }
+  return db
+    .query(
+      `INSERT INTO topics (slug, description) VALUES($1, $2)
+       RETURNING *`,
+      [slug, description]
+    )
+    .then(({ rows }) => {
+      return rows[0];
     });
 };

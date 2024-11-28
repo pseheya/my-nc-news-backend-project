@@ -650,6 +650,7 @@ describe("GET /api/articles (pagination)", () => {
   test("200: Respond with object, length 10 by default", () => {
     return request(app)
       .get("/api/articles")
+      .expect(200)
       .then(({ body }) => {
         expect(body.articles).toHaveLength(10);
         expect(body.total_count).toBe(13);
@@ -658,6 +659,7 @@ describe("GET /api/articles (pagination)", () => {
   test("200: Respond with object , length 5 and page 2", () => {
     return request(app)
       .get("/api/articles?limit=5&p=2")
+      .expect(200)
       .then(({ body }) => {
         expect(body.articles).toHaveLength(5);
         expect(body.total_count).toBe(13);
@@ -666,6 +668,7 @@ describe("GET /api/articles (pagination)", () => {
   test("400: Return a message that limit is not a number if limit is not valid", () => {
     return request(app)
       .get("/api/articles?limit=banana")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Limit is not a number");
       });
@@ -673,6 +676,7 @@ describe("GET /api/articles (pagination)", () => {
   test("400: Return a message that limit should be grater than 0 if limit is not valid", () => {
     return request(app)
       .get("/api/articles?limit=-10")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Limit shoul be grater 0");
       });
@@ -680,6 +684,7 @@ describe("GET /api/articles (pagination)", () => {
   test("400: Return a message 'Bad request' if page is not valid", () => {
     return request(app)
       .get("/api/articles?limit=5&p=banana")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
       });
@@ -687,6 +692,7 @@ describe("GET /api/articles (pagination)", () => {
   test("400: Return a message that page should be grater than 0 if page is not valid", () => {
     return request(app)
       .get("/api/articles?limit=10&p=-10")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Page shoul be grater 0");
       });
@@ -705,6 +711,7 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
   test("200: Respond with object, length 10 by default", () => {
     return request(app)
       .get("/api/articles/1/comments?limit=5")
+      .expect(200)
       .then(({ body }) => {
         expect(body.comment).toHaveLength(5);
       });
@@ -712,6 +719,7 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
   test("200: Respond with object , length 5 and page 2", () => {
     return request(app)
       .get("/api/articles/1/comments?limit=5&p=2")
+      .expect(200)
       .then(({ body }) => {
         expect(body.comment).toHaveLength(5);
       });
@@ -719,6 +727,7 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
   test("400: Return a message that limit is not a number if limit is not valid", () => {
     return request(app)
       .get("/api/articles/1/comments?limit=banana")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Limit is not a number");
       });
@@ -726,6 +735,7 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
   test("400: Return a message that limit should be grater than 0 if limit is not valid", () => {
     return request(app)
       .get("/api/articles/1/comments?limit=-10")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Limit shoul be grater 0");
       });
@@ -733,6 +743,7 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
   test("400: Return a message 'Bad request' if page is not valid", () => {
     return request(app)
       .get("/api/articles/1/comments?limit=5&p=banana")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
       });
@@ -740,8 +751,63 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
   test("400: Return a message 'Bad request' if page is not valid", () => {
     return request(app)
       .get("/api/articles/comments?limit=10&p=-10")
+      .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
       });
+  });
+});
+
+describe("POST /api/topics", () => {
+  test("201: Respond with new object that has slug and description properties ", () => {
+    const newTopic = {
+      slug: "doggy",
+      description: "This is not a cat",
+    };
+
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.topic).toEqual({
+          slug: "doggy",
+          description: "This is not a cat",
+        });
+      });
+  });
+  test("400: Respond with message bad request if missed one of the properites", () => {
+    const newTopic = {
+      slug: "doggy",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test.only("200: Respond with objects.length to be +1 after adding a new topic ", async () => {
+    const newTopic = {
+      slug: "doggy",
+      description: "This is not a cat",
+    };
+    const lengthOfTopicTable = await request(app)
+      .get("/api/topics")
+      .expect(200);
+
+    const addTopic = await request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201);
+
+    const lengthOfTopictAfterAddNewTopic = await request(app)
+      .get("/api/topics")
+      .expect(200);
+
+    expect(lengthOfTopictAfterAddNewTopic.body.topics.length).toBe(
+      lengthOfTopicTable.body.topics.length + 1
+    );
   });
 });

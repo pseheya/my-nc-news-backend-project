@@ -13,6 +13,7 @@ const {
   readUserByUsername,
   readAndPatchCommentByCommentId,
   addNewArticle,
+  patchNewTopic,
 } = require("../models/app.model");
 const { usersData, articleData, topicData } = require("../models/data.models");
 const { isImputNumber } = require("../utilitis/queryUtils");
@@ -192,6 +193,18 @@ exports.postNewArticle = (req, res, next) => {
     .then((article) => {
       updateEndpoits(req, article);
       res.status(201).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.addNewTopic = (req, res, next) => {
+  const { slug, description } = req.body;
+
+  patchNewTopic(slug, description)
+    .then((topic) => {
+      res.status(201).send({ topic });
     })
     .catch((err) => {
       next(err);
