@@ -15,6 +15,7 @@ const {
   addNewArticle,
 } = require("../models/app.model");
 const { usersData, articleData, topicData } = require("../models/data.models");
+const { isImputNumber } = require("../utilitis/queryUtils");
 const { user } = require("pg/lib/defaults");
 
 exports.getApiDocumentation = (req, res, next) => {
@@ -48,16 +49,19 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by, order, topic } = req.query;
-  const promises = [readArticles(sort_by, order, topic)];
+  const { sort_by, order, topic, limit, p } = req.query;
+  const promises = [readArticles(sort_by, order, topic, limit, p)];
 
   if (topic) {
     promises.push(topicData(topic));
   }
+
   Promise.all(promises)
-    .then(([articles]) => {
-      updateEndpoits(req, articles);
-      res.status(200).send({ articles });
+    .then(([data]) => {
+      const totalCount = Number(data.total_count);
+      res
+        .status(200)
+        .send({ articles: data.articles, total_count: totalCount });
     })
     .catch((err) => {
       next(err);

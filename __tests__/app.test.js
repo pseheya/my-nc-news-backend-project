@@ -103,7 +103,7 @@ describe("GET /api/articles", () => {
       .get("/api/articles")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toHaveLength(10);
         body.articles.forEach((article) => {
           expect.objectContaining({
             author: expect.any(String),
@@ -361,7 +361,7 @@ describe("GET /api/articles (sorting queries)", () => {
       .get("/api/articles?sorted_by")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toHaveLength(10);
         expect(body.articles).toBeSortedBy("created_at", { descending: true });
       });
   });
@@ -370,7 +370,7 @@ describe("GET /api/articles (sorting queries)", () => {
       .get("/api/articles?sort_by=topic&order=ASC")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toHaveLength(10);
         expect(body.articles).toBeSortedBy("topic");
       });
   });
@@ -379,7 +379,7 @@ describe("GET /api/articles (sorting queries)", () => {
       .get("/api/articles?sort_by=topic&order=DESC")
       .expect(200)
       .then(({ body }) => {
-        expect(body.articles).toHaveLength(5);
+        expect(body.articles).toHaveLength(10);
         expect(body.articles).toBeSortedBy("topic", { descending: true });
       });
   });
@@ -633,6 +633,18 @@ describe("POST /api/articles", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Bad request");
+      });
+  });
+});
+
+describe("GET /api/articles (pagination)", () => {
+  test("200: Respond with object that takes a limit of articles and return this in fistr page by default", () => {
+    return request(app)
+      .get("/api/articles?limit=5")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(5);
+        expect(body.total_count).toBe(13);
       });
   });
 });
