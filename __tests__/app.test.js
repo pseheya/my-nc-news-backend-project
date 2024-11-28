@@ -428,7 +428,7 @@ describe("GET /api/articles (topic query)", () => {
       .get("/api/articles?topic=banana")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("This topic is not exist");
+        expect(body.msg).toBe("This topic does not exist");
       });
   });
   test("400: Respond with message 'Topic is not valid' when we passing a SQL injection words", () => {
@@ -678,7 +678,7 @@ describe("GET /api/articles (pagination)", () => {
       .get("/api/articles?limit=-10")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Limit shoul be grater 0");
+        expect(body.msg).toBe("Limit shoul be greater 0");
       });
   });
   test("400: Return a message 'Bad request' if page is not valid", () => {
@@ -694,7 +694,7 @@ describe("GET /api/articles (pagination)", () => {
       .get("/api/articles?limit=10&p=-10")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Page shoul be grater 0");
+        expect(body.msg).toBe("Page shoul be greater 0");
       });
   });
 });
@@ -737,7 +737,7 @@ describe("GET /api/articles/:article_id/comments (pagination)", () => {
       .get("/api/articles/1/comments?limit=-10")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Limit shoul be grater 0");
+        expect(body.msg).toBe("Limit shoul be greater 0");
       });
   });
   test("400: Return a message 'Bad request' if page is not valid", () => {

@@ -43,8 +43,8 @@ exports.readArticles = async (
   sort_by = "created_at",
   order = "DESC",
   topic,
-  limit = "10",
-  p = "1"
+  limit = 10,
+  p = 1
 ) => {
   const validSortBy = ["created_at", "title", "topic", "author", "votes"];
   const validOrder = ["ASC", "DESC"];
