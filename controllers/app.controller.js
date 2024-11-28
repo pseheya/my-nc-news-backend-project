@@ -56,6 +56,10 @@ exports.getArticles = (req, res, next) => {
     promises.push(topicData(topic));
   }
 
+  if (limit || p) {
+    promises.push(isImputNumber(limit, p));
+  }
+
   Promise.all(promises)
     .then(([data]) => {
       const totalCount = Number(data.total_count);
@@ -71,9 +75,15 @@ exports.getArticles = (req, res, next) => {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
+  const { limit, p } = req.query;
+  const promises = [readCommentsByArticleId(article_id, limit, p)];
 
-  readCommentsByArticleId(article_id)
-    .then((comment) => {
+  if (limit || p) {
+    promises.push(isImputNumber(limit, p));
+  }
+
+  Promise.all(promises)
+    .then(([comment]) => {
       updateEndpoits(req, comment);
       res.status(200).send({ comment });
     })

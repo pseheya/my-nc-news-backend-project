@@ -1,14 +1,26 @@
-exports.isImputNumber = (number) => {
-  if (typeof number !== number) {
+exports.isImputNumber = (limit, p) => {
+  if (isNaN(limit)) {
     return Promise.reject({
       status: 400,
-      msg: "Limit or page is not a number",
+      msg: "Limit is not a number",
     });
   }
-  if (number < 0) {
+  if (typeof Number(p) !== "number") {
     return Promise.reject({
       status: 400,
-      msg: "Limit or page shoul be grater 0",
+      msg: "Page is not a number",
+    });
+  }
+  if (Number(limit) < 0) {
+    return Promise.reject({
+      status: 400,
+      msg: "Limit shoul be grater 0",
+    });
+  }
+  if (Number(p) < 0) {
+    return Promise.reject({
+      status: 400,
+      msg: "Page shoul be grater 0",
     });
   }
 };

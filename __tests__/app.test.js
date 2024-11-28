@@ -663,4 +663,85 @@ describe("GET /api/articles (pagination)", () => {
         expect(body.total_count).toBe(13);
       });
   });
+  test("400: Return a message that limit is not a number if limit is not valid", () => {
+    return request(app)
+      .get("/api/articles?limit=banana")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Limit is not a number");
+      });
+  });
+  test("400: Return a message that limit should be grater than 0 if limit is not valid", () => {
+    return request(app)
+      .get("/api/articles?limit=-10")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Limit shoul be grater 0");
+      });
+  });
+  test("400: Return a message 'Bad request' if page is not valid", () => {
+    return request(app)
+      .get("/api/articles?limit=5&p=banana")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Return a message that page should be grater than 0 if page is not valid", () => {
+    return request(app)
+      .get("/api/articles?limit=10&p=-10")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Page shoul be grater 0");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments (pagination)", () => {
+  test("200: Respond with object with limits 10 by default", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toHaveLength(10);
+      });
+  });
+  test("200: Respond with object, length 10 by default", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=5")
+      .then(({ body }) => {
+        expect(body.comment).toHaveLength(5);
+      });
+  });
+  test("200: Respond with object , length 5 and page 2", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=5&p=2")
+      .then(({ body }) => {
+        expect(body.comment).toHaveLength(5);
+      });
+  });
+  test("400: Return a message that limit is not a number if limit is not valid", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=banana")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Limit is not a number");
+      });
+  });
+  test("400: Return a message that limit should be grater than 0 if limit is not valid", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=-10")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Limit shoul be grater 0");
+      });
+  });
+  test("400: Return a message 'Bad request' if page is not valid", () => {
+    return request(app)
+      .get("/api/articles/1/comments?limit=5&p=banana")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
+  test("400: Return a message 'Bad request' if page is not valid", () => {
+    return request(app)
+      .get("/api/articles/comments?limit=10&p=-10")
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad request");
+      });
+  });
 });

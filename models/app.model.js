@@ -99,18 +99,15 @@ FROM articles `;
   });
 };
 
-exports.readCommentsByArticleId = (id) => {
-  return db
-    .query(
-      "SELECT * FROM comments WHERE article_id = $1 ORDER BY comments.created_at ASC",
-      [id]
-    )
-    .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({ status: 404, msg: "Not found" });
-      }
-      return rows;
-    });
+exports.readCommentsByArticleId = (id, limit = 10, p = 1) => {
+  let sqlQuery = `SELECT * FROM comments WHERE article_id = $1 ORDER BY comments.created_at ASC LIMIT $2 OFFSET $3`;
+  const values = [id, Number(limit), (Number(p) - 1) * Number(limit)];
+  return db.query(sqlQuery, values).then(({ rows }) => {
+    if (rows.length === 0) {
+      return Promise.reject({ status: 404, msg: "Not found" });
+    }
+    return rows;
+  });
 };
 
 exports.readCommentsByCommentId = (id) => {
