@@ -14,9 +14,10 @@ const {
   readAndPatchCommentByCommentId,
   addNewArticle,
   patchNewTopic,
+  deleteArticleByArticleId,
 } = require("../models/app.model");
 const { usersData, articleData, topicData } = require("../models/data.models");
-const { isImputNumber } = require("../utilitis/queryUtils");
+const { isValidLimit } = require("../utilitis/queryUtils");
 const { user } = require("pg/lib/defaults");
 
 exports.getApiDocumentation = (req, res, next) => {
@@ -50,7 +51,15 @@ exports.getArticleById = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  const { sort_by, order, topic, limit, p } = req.query;
+  let { sort_by, order, topic, limit, p } = req.query;
+
+  if (!limit) {
+    limit = 10;
+  }
+  if (!p) {
+    p = 1;
+  }
+
   const promises = [readArticles(sort_by, order, topic, limit, p)];
 
   if (topic) {
@@ -58,7 +67,7 @@ exports.getArticles = (req, res, next) => {
   }
 
   if (limit || p) {
-    promises.push(isImputNumber(limit, p));
+    promises.push(isValidLimit(limit, p));
   }
 
   Promise.all(promises)
@@ -80,7 +89,7 @@ exports.getCommentsByArticleId = (req, res, next) => {
   const promises = [readCommentsByArticleId(article_id, limit, p)];
 
   if (limit || p) {
-    promises.push(isImputNumber(limit, p));
+    promises.push(isValidLimit(limit, p));
   }
 
   Promise.all(promises)
@@ -118,6 +127,7 @@ exports.getAllUsers = (req, res, next) => {
 exports.postCommentByArticleId = (req, res, next) => {
   const { username, body } = req.body;
   const { article_id } = req.params;
+
   createCommentById(article_id, username, body)
     .then(([comment]) => {
       updateEndpoits(req, comment);
@@ -206,6 +216,18 @@ exports.addNewTopic = (req, res, next) => {
     .then((topic) => {
       updateEndpoits(req, topic);
       res.status(201).send({ topic });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+exports.removeArticleByArticleID = (req, res, next) => {
+  const { article_id } = req.params;
+
+  deleteArticleByArticleId(article_id)
+    .then(() => {
+      res.status(204).send();
     })
     .catch((err) => {
       next(err);

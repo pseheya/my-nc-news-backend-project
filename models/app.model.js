@@ -43,8 +43,8 @@ exports.readArticles = async (
   sort_by = "created_at",
   order = "DESC",
   topic,
-  limit = 10,
-  p = 1
+  limit,
+  p
 ) => {
   const validSortBy = ["created_at", "title", "topic", "author", "votes"];
   const validOrder = ["ASC", "DESC"];
@@ -88,6 +88,7 @@ FROM articles `;
   const totalCountOfArticle = totalCount.rows[0].total_count;
 
   sqlQuery += ` LIMIT $1 OFFSET $2`;
+
   queryValues.push(Number(limit), (Number(p) - 1) * Number(limit));
 
   if (topic && topic !== undefined) {
@@ -221,4 +222,22 @@ exports.patchNewTopic = (slug, description) => {
     .then(({ rows }) => {
       return rows[0];
     });
+};
+
+exports.deleteArticleByArticleId = async (id) => {
+  const sqlQueryForComments = "DELETE FROM comments WHERE article_id = $1";
+  const sqlQueryForArticles = "DELETE FROM articles WHERE article_id = $1";
+
+  const deleteFromComments = await db.query(sqlQueryForComments, [id]);
+  const deleteFromArticles = await db.query(sqlQueryForArticles, [id]);
+  const promises = [deleteFromComments, deleteFromArticles];
+
+  return Promise.all(promises).then((result) => {
+    if (result[1].rowCount === 0) {
+      return Promise.reject({
+        status: 404,
+        msg: "This article_id does not exist",
+      });
+    }
+  });
 };

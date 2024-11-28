@@ -11,6 +11,7 @@ const {
   topicData,
   userData,
 } = require("../db/data/test-data/index.js");
+const { binary } = require("pg/lib/defaults.js");
 
 beforeEach(() => {
   return seed({ topicData, userData, articleData, commentData });
@@ -182,7 +183,7 @@ describe("POST /api/articles/:article_id/comments", () => {
         });
       });
   });
-  test("404: Respond with msg 'Bad request', if article_id is valid but not exist", () => {
+  test("404: Respond with msg 'This article id does not exist', if article_id is valid but not exist", () => {
     const newComment = {
       username: "icellusedkars",
       body: "They can do it better, but it is what it is",
@@ -191,9 +192,9 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/999/comments")
       .send(newComment)
-      .expect(400)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Bad request");
+        expect(body.msg).toBe("This request does not exist in database");
       });
   });
   test("400: Respond with msg 'Bad request', when user name is not exist in database", () => {
@@ -205,9 +206,9 @@ describe("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/2/comments")
       .send(newComment)
-      .expect(400)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Bad request");
+        expect(body.msg).toBe("This request does not exist in database");
       });
   });
 });
@@ -590,7 +591,7 @@ describe("POST /api/articles", () => {
         });
       });
   });
-  test("400: Respond with msg Bad request if user does not exist", () => {
+  test("404: Respond with msg Not found if user does not exist", () => {
     const newArticle = {
       title: "Hi! Its my first article",
       topic: "cats",
@@ -601,12 +602,12 @@ describe("POST /api/articles", () => {
     return request(app)
       .post("/api/articles")
       .send(newArticle)
-      .expect(400)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Bad request");
+        expect(body.msg).toBe("This request does not exist in database");
       });
   });
-  test("400: Respond with msg Bad request if topic does not exist", () => {
+  test("404: Respond with msg not found if topic does not exist", () => {
     const newArticle = {
       title: "Hi! Its my first article",
       topic: "banana",
@@ -617,9 +618,9 @@ describe("POST /api/articles", () => {
     return request(app)
       .post("/api/articles")
       .send(newArticle)
-      .expect(400)
+      .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Bad request");
+        expect(body.msg).toBe("This request does not exist in database");
       });
   });
   test("400: Respond with msg Bad request if properies from body missed", () => {
@@ -695,6 +696,15 @@ describe("GET /api/articles (pagination)", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Page shoul be greater 0");
+      });
+  });
+  test("200: Respond with object, that by default has limit 10, but take respond with another page", () => {
+    return request(app)
+      .get("/api/articles?p=2")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(3);
+        expect(body.total_count).toBe(13);
       });
   });
 });
@@ -809,5 +819,48 @@ describe("POST /api/topics", () => {
     expect(lengthOfTopictAfterAddNewTopic.body.topics.length).toBe(
       lengthOfTopicTable.body.topics.length + 1
     );
+  });
+});
+
+describe("DELETE /api/articles/:article_id", () => {
+  test("204: Return message that article deleted if this article_id exist", () => {
+    return request(app)
+      .delete("/api/articles/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+      });
+  });
+  test("204, 404: Respond with message that this article_id not found", () => {
+    return request(app)
+      .delete("/api/articles/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+        return request(app).get("/api/articles/1").expect(404);
+      })
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("204, 404: Respond with message that is no comment with this article_id", () => {
+    return request(app)
+      .delete("/api/articles/1")
+      .expect(204)
+      .then(({ body }) => {
+        expect(body).toEqual({});
+        return request(app).get("/api/articles/1/comments").expect(404);
+      })
+      .then(({ body }) => {
+        expect(body.msg).toBe("Not found");
+      });
+  });
+  test("404: Respond with message that id is not found", () => {
+    return request(app)
+      .delete("/api/articles/9588475")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("This article_id does not exist");
+      });
   });
 });

@@ -1,4 +1,4 @@
-exports.isImputNumber = (limit, p) => {
+exports.isValidLimit = (limit, p) => {
   if (isNaN(limit)) {
     return Promise.reject({
       status: 400,

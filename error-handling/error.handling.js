@@ -1,5 +1,10 @@
 exports.sqlErrors = (err, req, res, next) => {
   if (err.code) {
+    if (err.code === "23503") {
+      return res
+        .status(404)
+        .send({ msg: "This request does not exist in database" });
+    }
     return res.status(400).send({ msg: "Bad request" });
   }
   next(err);
