@@ -20,7 +20,7 @@ exports.articleData = (article_id) => {
       if (!rows.length) {
         return Promise.reject({
           status: 404,
-          msg: "This article id is not exist",
+          msg: "This article id does not exist",
         });
       }
     });
@@ -33,7 +33,7 @@ exports.commentId = (comment_id) => {
       if (!rows.length) {
         return Promise.reject({
           status: 404,
-          msg: "This comment id is not exist",
+          msg: "This comment id does not exist",
         });
       }
     });
@@ -44,7 +44,10 @@ exports.topicData = (topic) => {
     .query("SELECT * FROM topics WHERE topics.slug = $1", [topic])
     .then(({ rows }) => {
       if (!rows.length) {
-        return Promise.reject({ status: 404, msg: "This topic is not exist" });
+        return Promise.reject({
+          status: 404,
+          msg: "This topic does not exist",
+        });
       }
     });
 };
