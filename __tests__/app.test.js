@@ -788,7 +788,7 @@ describe("POST /api/topics", () => {
         expect(body.msg).toBe("Bad request");
       });
   });
-  test.only("200: Respond with objects.length to be +1 after adding a new topic ", async () => {
+  test("200: Respond with objects.length to be +1 after adding a new topic ", async () => {
     const newTopic = {
       slug: "doggy",
       description: "This is not a cat",

@@ -204,6 +204,7 @@ exports.addNewTopic = (req, res, next) => {
 
   patchNewTopic(slug, description)
     .then((topic) => {
+      updateEndpoits(req, topic);
       res.status(201).send({ topic });
     })
     .catch((err) => {
