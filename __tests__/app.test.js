@@ -647,4 +647,20 @@ describe("GET /api/articles (pagination)", () => {
         expect(body.total_count).toBe(13);
       });
   });
+  test("200: Respond with object, length 10 by default", () => {
+    return request(app)
+      .get("/api/articles")
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(10);
+        expect(body.total_count).toBe(13);
+      });
+  });
+  test("200: Respond with object , length 5 and page 2", () => {
+    return request(app)
+      .get("/api/articles?limit=5&p=2")
+      .then(({ body }) => {
+        expect(body.articles).toHaveLength(5);
+        expect(body.total_count).toBe(13);
+      });
+  });
 });

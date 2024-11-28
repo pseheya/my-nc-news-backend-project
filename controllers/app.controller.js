@@ -59,6 +59,7 @@ exports.getArticles = (req, res, next) => {
   Promise.all(promises)
     .then(([data]) => {
       const totalCount = Number(data.total_count);
+      updateEndpoits(req, data);
       res
         .status(200)
         .send({ articles: data.articles, total_count: totalCount });
