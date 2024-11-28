@@ -14,13 +14,13 @@ exports.isImputNumber = (limit, p) => {
   if (Number(limit) < 0) {
     return Promise.reject({
       status: 400,
-      msg: "Limit shoul be grater 0",
+      msg: "Limit shoul be greater 0",
     });
   }
   if (Number(p) < 0) {
     return Promise.reject({
       status: 400,
-      msg: "Page shoul be grater 0",
+      msg: "Page shoul be greater 0",
     });
   }
 };
