@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
 const {
   sqlErrors,
@@ -7,6 +8,8 @@ const {
   serverError,
   unmatchRouts,
 } = require("./error-handling/error.handling");
+
+app.use(cors());
 const apiRouter = require("./routers/router");
 
 app.use(express.json());
