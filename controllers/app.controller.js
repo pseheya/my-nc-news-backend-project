@@ -16,6 +16,7 @@ const {
   patchNewTopic,
   deleteArticleByArticleId,
   readArticlesByUser,
+  readAllCommentsByUsername,
 } = require("../models/app.model");
 const { usersData, articleData, topicData } = require("../models/data.models");
 const { isValidLimit } = require("../utilitis/queryUtils");
@@ -241,6 +242,16 @@ exports.getAllArticlesByUserName = (req, res, next) => {
   readArticlesByUser(username)
     .then((articles) => {
       res.status(200).json({ articles });
+    })
+    .catch(next);
+};
+
+exports.getAllCommentsByUserName = (req, res, next) => {
+  const { username } = req.params;
+
+  readAllCommentsByUsername(username)
+    .then((comments) => {
+      res.status(200).send({ comments });
     })
     .catch(next);
 };
