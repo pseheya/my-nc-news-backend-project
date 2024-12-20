@@ -241,3 +241,17 @@ exports.deleteArticleByArticleId = async (id) => {
     }
   });
 };
+
+exports.readArticlesByUser = (username) => {
+  return db
+    .query("SELECT * FROM articles WHERE author = $1", [username])
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "No articles found for this user",
+        });
+      }
+      return rows;
+    });
+};

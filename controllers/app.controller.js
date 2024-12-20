@@ -15,6 +15,7 @@ const {
   addNewArticle,
   patchNewTopic,
   deleteArticleByArticleId,
+  readArticlesByUser,
 } = require("../models/app.model");
 const { usersData, articleData, topicData } = require("../models/data.models");
 const { isValidLimit } = require("../utilitis/queryUtils");
@@ -232,4 +233,14 @@ exports.removeArticleByArticleID = (req, res, next) => {
     .catch((err) => {
       next(err);
     });
+};
+
+exports.getAllArticlesByUserName = (req, res, next) => {
+  const { username } = req.params;
+
+  readArticlesByUser(username)
+    .then((articles) => {
+      res.status(200).json({ articles });
+    })
+    .catch(next);
 };
