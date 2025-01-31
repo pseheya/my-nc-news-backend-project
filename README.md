@@ -72,7 +72,9 @@ By default, the server will be running on port 9090, but this can be changed by 
 Once the server is running, you can interact with the API by sending HTTP requests to the following endpoints (example):
 
 GET /api/articles: Fetch all articles
+
 GET /api/categories: Fetch all categories
+
 GET /api/articles/:article_id: Fetch article by article_id, you need replace ":article_id" to number
 
 - Example Requests
